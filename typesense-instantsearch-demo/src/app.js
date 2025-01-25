@@ -241,6 +241,7 @@ search.addWidgets([
               ${themeLozenges}
             </div>
             <div class="links">
+              <p><strong>Policy Type:</strong> ${hit['Policy Type'] || 'N/A'}</p>
               <p><strong>Legiscan:</strong> <a href="${hit.Legiscan}" target="_blank">Link</a></p>
               <p><strong>Congress site:</strong> <a href="${hit['Congress site']}" target="_blank">Link</a></p>
             </div>
@@ -255,6 +256,14 @@ search.addWidgets([
   instantsearch.widgets.pagination({
     container: '#pagination',
     totalPages: 100, // Set the total number of pages
+  }),
+  instantsearch.widgets.refinementList({
+    container: '#policy-type-list',
+    attribute: 'Policy Type',
+    searchable: false, // Remove search functionality
+    showMore: true,
+    limit: 10,
+    showMoreLimit: 20,
   }),
   customDateRangePicker({
     container: '#intro-date-picker',
