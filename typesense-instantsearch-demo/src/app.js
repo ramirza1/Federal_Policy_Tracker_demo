@@ -243,7 +243,7 @@ search.addWidgets([
             <div class="links">
               <p><strong>Policy Type:</strong> ${hit['Policy Type'] || 'N/A'}</p>
               <p><strong>Legiscan:</strong> <a href="${hit.Legiscan}" target="_blank">Link</a></p>
-              <p><strong>Congress site:</strong> <a href="${hit['Congress site']}" target="_blank">Link</a></p>
+              <p><strong>Entity site:</strong> <a href="${hit['Entity site']}" target="_blank">Link</a></p>
             </div>
           </div>
         `;
