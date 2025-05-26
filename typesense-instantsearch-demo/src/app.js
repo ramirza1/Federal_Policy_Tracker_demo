@@ -109,6 +109,38 @@ const search = instantsearch({
   },
 });
 
+// Custom checkbox filter for Current Legislative Session
+const customCurrentSessionFilter = instantsearch.connectors.connectRefinementList((renderOptions, isFirstRender) => {
+  const { items, refine, createURL } = renderOptions;
+
+  if (isFirstRender) {
+    const container = document.querySelector('#current-session-filter');
+    container.innerHTML = `
+      <div class="current-session-checkbox">
+        <input type="checkbox" id="current-session-checkbox" />
+        <label for="current-session-checkbox">Current legislative session only</label>
+      </div>
+    `;
+
+    const checkbox = document.querySelector('#current-session-checkbox');
+    checkbox.addEventListener('change', function() {
+      if (this.checked) {
+        refine('1'); // Filter to show only current session (value = 1)
+      } else {
+        refine('1'); // Toggle off the filter
+      }
+    });
+  }
+
+  // Update checkbox state based on current refinements
+  const checkbox = document.querySelector('#current-session-checkbox');
+  const isCurrentSessionSelected = items.find(item => item.value === '1' && item.isRefined);
+  
+  if (checkbox) {
+    checkbox.checked = !!isCurrentSessionSelected;
+  }
+});
+
 // Custom date range picker widget
 const customDateRangePicker = instantsearch.connectors.connectRange((renderOptions, isFirstRender) => {
   const { refine, currentRefinement } = renderOptions;
@@ -256,6 +288,10 @@ search.addWidgets([
   instantsearch.widgets.pagination({
     container: '#pagination',
     totalPages: 100, // Set the total number of pages
+  }),
+  customCurrentSessionFilter({
+    container: '#current-session-filter',
+    attribute: 'Current legislative session',
   }),
   instantsearch.widgets.refinementList({
     container: '#policy-type-list',

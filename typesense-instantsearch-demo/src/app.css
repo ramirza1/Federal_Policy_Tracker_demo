@@ -27,22 +27,6 @@
   color: #e56c10;
 }
 
-  /* Flex container for title and Home button */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px; /* Adjust as needed to add space below title */
-  flex-wrap: nowrap; /* Prevent wrapping onto the next line */
-}
-
-
-/* Style adjustments for search controls */
-.search-controls {
-  margin-top: 10px; /* Ensures space between title and search box */
-}
-
-
 /* Filters header */
 .search-panel__filters h2 {
   color: #002c50;
@@ -51,6 +35,38 @@
 /* Filter section headers */
 .search-panel__filters h3 {
   color: #002c50;
+}
+
+/* Current Legislative Session Filter Styles */
+.current-session-filter {
+  margin: 15px 0;
+}
+
+.current-session-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.current-session-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.current-session-checkbox label {
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+  color: #002c50;
+  font-weight: normal;
+  font-family: inherit;
+}
+
+.current-session-checkbox:hover label {
+  color: #002c50;
+  font-weight: 500;
 }
 
 /* Search box and stats */

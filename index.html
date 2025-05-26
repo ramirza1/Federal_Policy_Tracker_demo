@@ -10,10 +10,10 @@
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FKRBBGLLFC"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-FKRBBGLLFC');
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FKRBBGLLFC');
     </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.3.1/themes/algolia-min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -67,6 +67,22 @@
         #pagination {
             margin-top: 20px;
         }
+        .current-session-filter {
+            margin: 15px 0;
+        }
+        .current-session-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .current-session-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+        .current-session-checkbox label {
+            cursor: pointer;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -81,6 +97,9 @@
         <div class="search-panel">
             <div class="search-panel__filters">
                 <h2>Filters</h2>
+                 <div>
+                    <div id="current-session-filter"></div>
+                </div>
                 <div>
                     <h3>Policy Type</h3>
                     <div id="policy-type-list"></div>
