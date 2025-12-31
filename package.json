@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "instantsearch.js": "^4.74.1",
+    "instantsearch.js": "^4.25.0",
     "mkdirp": "^3.0.1",
     "typesense-instantsearch-adapter": "^2.8.0"
   },
