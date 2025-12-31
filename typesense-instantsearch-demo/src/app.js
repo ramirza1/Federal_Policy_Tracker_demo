@@ -12,7 +12,7 @@ const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
     connectionTimeoutSeconds: 10  // Increased from default 5 seconds
   },
   additionalSearchParameters: {
-    query_by: "Name,Introduced by,Themes,Bill Summary,embedding" // Added 'embedding'
+    query_by: "Name,Introduced by,Themes,Bill Summary" 
   }
 });
 
@@ -30,7 +30,7 @@ const searchConfig = {
   keywordWeight: 0.3,
   vectorK: 1000, // Will be updated dynamically
   typoTolerance: 2,
-  queryBy: ['Name', 'Introduced by', 'Themes', 'Bill Summary', 'embedding'], // Include 'embedding'
+  queryBy: ['Name', 'Introduced by', 'Themes', 'Bill Summary'], 
 };
 
 // Function to calculate the number of hits per page
@@ -62,13 +62,6 @@ function updateHitsPerPage() {
   // Update searchConfig with new vectorK
   searchConfig.vectorK = vectorK;
 
-  // Update hitsPerPage using the configure widget
-  search.addWidget(
-    instantsearch.widgets.configure({
-      hitsPerPage: hitsPerPage,
-    })
-  );
-
   // Trigger a search to apply the new hitsPerPage and vectorK
   search.helper.setQueryParameter('hitsPerPage', hitsPerPage).search();
 }
@@ -78,35 +71,66 @@ const search = instantsearch({
   indexName: 'bills_federal',
   searchClient,
   searchFunction(helper) {
-    let query = helper.state.query;
-    const page = helper.getPage();
-    const perPage = helper.state.hitsPerPage || 10;
-    const vectorK = searchConfig.vectorK || perPage * 100; // Default to 100 pages if not set
+  // Read current UI state
+  let query = (helper.state.query || "").trim();
+  const page = helper.getPage();
+  const perPage = helper.state.hitsPerPage || 10;
 
-    if (query) {
-      query = normalizeQuery(query);
-      helper.setQueryParameter('q', query);
-      helper.setQueryParameter('query_by', searchConfig.queryBy.join(','));
-      helper.setQueryParameter('hybrid_search', {
-        enabled: true,
-        weight: {
-          vector: searchConfig.vectorWeight,
-          keyword: searchConfig.keywordWeight,
-        },
-      });
-      helper.setQueryParameter('typo_tolerance', {
-        enabled: true,
-        num_typos: searchConfig.typoTolerance,
-      });
-      // Set the vector_query parameter with the calculated vectorK
-      helper.setQueryParameter('vector_query', `embedding:([], k:${vectorK})`);
-    } else {
-      helper.setQueryParameter('vector_query', undefined);
-      helper.setQueryParameter('hybrid_search', undefined);
-    }
-    helper.setPage(page);
+  // Decide k for vector search (keeps your dynamic behavior)
+  const vectorK = searchConfig.vectorK || perPage * 100;
+
+  // Always keep pagination consistent
+  helper.setPage(page);
+
+  // If there is NO query, explicitly disable hybrid/vector and run a normal faceted browse
+  if (!query) {
+    // Important: clear any previous hybrid/vector settings so they don't "stick"
+    helper.setQueryParameter("hybrid_search", undefined);
+    helper.setQueryParameter("vector_query", undefined);
+
+    // Keep keyword settings sane
+    helper.setQueryParameter("query_by", searchConfig.queryBy.join(","));
+
+    // You can keep typo tolerance enabled even for empty query, but it's irrelevant; clear to be safe
+    helper.setQueryParameter("typo_tolerance", undefined);
+
+    // Let adapter handle q (don’t set helper.setQueryParameter('q', ...))
     helper.search();
-  },
+    return;
+  }
+
+  // Normalize query for your special case(s)
+  query = normalizeQuery(query);
+
+  // DO NOT set 'q' manually — InstantSearch/adapter already uses helper.state.query
+  // helper.setQueryParameter('q', query);  // <-- remove
+
+  // Ensure query_by matches your text fields only
+  helper.setQueryParameter("query_by", searchConfig.queryBy.join(","));
+
+  // Enable hybrid search with your weights
+  helper.setQueryParameter("hybrid_search", {
+    enabled: true,
+    weight: {
+      vector: searchConfig.vectorWeight,
+      keyword: searchConfig.keywordWeight,
+    },
+  });
+
+  // Typo tolerance: keep it simple. If Typesense expects a scalar, this will still be fine,
+  // but if your server supports the object form, it stays.
+  helper.setQueryParameter("typo_tolerance", {
+    enabled: true,
+    num_typos: searchConfig.typoTolerance,
+  });
+
+  // Vector query: IMPORTANT — use the computed k, and target your embedding field
+  helper.setQueryParameter("vector_query", `embedding:([], k:${vectorK})`);
+
+  // Run search once
+  helper.search();
+}
+,
 });
 
 // Custom checkbox filter for Current Legislative Session
