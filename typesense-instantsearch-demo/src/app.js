@@ -21,7 +21,16 @@ const searchClient = typesenseInstantsearchAdapter.searchClient;
 
 // Normalize the search query
 function normalizeQuery(query) {
-  return query.toLowerCase().replace(/deep fake/g, 'deepfake');
+  let q = (query || "").toLowerCase().trim();
+
+  // Normalize separators
+  q = q.replace(/[-_/]+/g, " ");
+  q = q.replace(/\s+/g, " ");
+
+  // Canonicalize deepfake variants
+  q = q.replace(/\bdeep\s*fake(s)?\b/g, "deepfake");
+
+  return q;
 }
 
 // Initialize the search configuration
@@ -101,12 +110,17 @@ const search = instantsearch({
 
   // Normalize query for your special case(s)
   query = normalizeQuery(query);
+  helper.setQuery(query);
 
   // DO NOT set 'q' manually — InstantSearch/adapter already uses helper.state.query
   // helper.setQueryParameter('q', query);  // <-- remove
 
   // Ensure query_by matches your text fields only
   helper.setQueryParameter("query_by", searchConfig.queryBy.join(","));
+
+  const qLen = query.length;
+  const vectorWeight = qLen <= 12 ? 0.9 : searchConfig.vectorWeight;
+  const keywordWeight = 1 - vectorWeight;
 
   // Enable hybrid search with your weights
   helper.setQueryParameter("hybrid_search", {
@@ -115,13 +129,6 @@ const search = instantsearch({
       vector: searchConfig.vectorWeight,
       keyword: searchConfig.keywordWeight,
     },
-  });
-
-  // Typo tolerance: keep it simple. If Typesense expects a scalar, this will still be fine,
-  // but if your server supports the object form, it stays.
-  helper.setQueryParameter("typo_tolerance", {
-    enabled: true,
-    num_typos: searchConfig.typoTolerance,
   });
 
   // Vector query: IMPORTANT — use the computed k, and target your embedding field
